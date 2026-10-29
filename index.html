@@ -196,6 +196,8 @@ button{font:inherit}
 .note p{margin:0 0 8px}
 .note p:last-child{margin:0}
 .pgroup > .hint{margin:0 0 10px}
+.steps{margin:6px 0 10px;padding-left:1.4em;max-width:68ch}
+.steps li{margin:4px 0}
 .pgroup{margin:0 0 28px}
 .pgroup h2{display:flex;align-items:center;gap:.5rem;font-size:1.3rem;margin:0 0 6px;padding-bottom:6px;border-bottom:3px solid var(--c)}
 .g-count{margin-left:auto;font-size:.9rem;color:var(--ink-soft);font-weight:600}
@@ -314,6 +316,8 @@ const S = {
   view:'home', player:null, theme:null,
   clips:{},
   words:{edits:{}, hidden:[], custom:[]},
+  local:{clips:{}, words:null, removed:[]},
+  site:{clips:{}, words:null, savedAt:null, loaded:false},
   stars:{},
   mic:'unknown',
   saving:null,
@@ -432,22 +436,37 @@ const store = {
   }
 };
 
+const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+const arr = v => Array.isArray(v) ? v : [];
+const str = v => typeof v === 'string' ? v.slice(0, 80) : '';
+const okClipId = id => /^[a-z0-9-]+$/.test(id);
+const okAudio = a => typeof a === 'string' && /^data:(audio|video)\//.test(a);
+const EMPTY_WORDS = () => ({edits:{}, hidden:[], custom:[]});
+function parseWords(v){
+  const edits = {};
+  for (const [id, e] of Object.entries(obj(v.edits))){
+    if (SEED_IDS.has(id) && e && typeof e === 'object') edits[id] = {da:str(e.da), ar:str(e.ar), tr:str(e.tr), emoji:str(e.emoji)};
+  }
+  const hidden = arr(v.hidden).filter(id => SEED_IDS.has(id));
+  const custom = arr(v.custom).filter(w => w && /^c-[a-z0-9]+$/.test(w.id) && THEMES.some(t => t.id === w.theme))
+    .map(w => ({id:w.id, theme:w.theme, da:str(w.da), ar:str(w.ar), tr:str(w.tr), emoji:str(w.emoji) || '⭐'}));
+  return {edits, hidden, custom};
+}
+function parseClips(v){
+  const out = {};
+  for (const [id, c] of Object.entries(obj(v))) if (okClipId(id) && c && okAudio(c.audio)) out[id] = {audio:c.audio};
+  return out;
+}
+/* What this device has saved itself. */
 function applyLoaded(data){
-  const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
-  const arr = v => Array.isArray(v) ? v : [];
-  const str = v => typeof v === 'string' ? v.slice(0, 80) : '';
   for (const [k, v] of Object.entries(data)){
-    if (k.startsWith('clip-') && /^[a-z0-9-]+$/.test(k.slice(5)) && v && typeof v.audio === 'string' && /^data:(audio|video)\//.test(v.audio)){
-      S.clips[k.slice(5)] = {audio:v.audio};
+    if (k.startsWith('clip-')){
+      const id = k.slice(5);
+      if (okClipId(id) && v && okAudio(v.audio)) S.local.clips[id] = {audio:v.audio};
     } else if (k === 'words' && v){
-      const edits = {};
-      for (const [id, e] of Object.entries(obj(v.edits))){
-        if (SEED_IDS.has(id) && e && typeof e === 'object') edits[id] = {da:str(e.da), ar:str(e.ar), tr:str(e.tr), emoji:str(e.emoji)};
-      }
-      const hidden = arr(v.hidden).filter(id => SEED_IDS.has(id));
-      const custom = arr(v.custom).filter(w => w && /^c-[a-z0-9]+$/.test(w.id) && THEMES.some(t => t.id === w.theme))
-        .map(w => ({id:w.id, theme:w.theme, da:str(w.da), ar:str(w.ar), tr:str(w.tr), emoji:str(w.emoji) || '⭐'}));
-      S.words = {edits, hidden, custom};
+      S.local.words = parseWords(v);
+    } else if (k === 'removed' && v){
+      S.local.removed = arr(v.ids).filter(okClipId);
     } else if (k === 'players' && v){
       for (const pid of Object.keys(PLAYERS)){
         const e = obj(v[pid]);
@@ -459,9 +478,58 @@ function applyLoaded(data){
       for (const pid of Object.keys(PLAYERS)) if (Number.isFinite(st[pid])) S.stars[pid] = Math.max(0, Math.floor(st[pid]));
     }
   }
+  recompute();
+}
+/* The shared sound file published on the website. */
+function applySite(d){
+  if (!d || d.app !== 'kalimati') return false;
+  S.site = {clips:parseClips(d.clips), words:d.words ? parseWords(obj(d.words)) : null,
+    savedAt:typeof d.savedAt === 'string' ? d.savedAt : null, loaded:true};
+  recompute();
+  return true;
+}
+/* Website sound is the base; this device's own recordings and edits sit on top. */
+function recompute(){
+  const clips = {};
+  for (const [id, c] of Object.entries(S.site.clips)) if (!S.local.removed.includes(id)) clips[id] = c;
+  Object.assign(clips, S.local.clips);
+  S.clips = clips;
+  S.words = S.local.words || (S.site.words ? JSON.parse(JSON.stringify(S.site.words)) : EMPTY_WORDS());
+}
+function stable(v){
+  if (Array.isArray(v)) return '[' + v.map(stable).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + stable(v[k])).join(',') + '}';
+  return JSON.stringify(v);
+}
+function hasUnpublished(){
+  const a = S.clips, b = S.site.clips;
+  const ka = Object.keys(a);
+  if (ka.length !== Object.keys(b).length) return true;
+  for (const k of ka) if (!b[k] || b[k].audio !== a[k].audio) return true;
+  return stable(S.words) !== stable(S.site.words || EMPTY_WORDS());
+}
+async function loadSite(){
+  if (window.claude) return;
+  try {
+    const r = await fetch('kalimati-lyd.json', {cache:'no-cache'});
+    if (r.ok) applySite(await r.json());
+  } catch (e) {}
+  S.site.loaded = true;
+}
+function removeClip(id){
+  if (S.local.clips[id]){
+    delete S.local.clips[id];
+    store.write('clip-' + id, null).catch(() => toast('Optagelsen kunne ikke slettes. Prøv igen.'));
+  }
+  if (S.site.clips[id] && !S.local.removed.includes(id)){
+    S.local.removed.push(id);
+    store.write('removed', {ids:S.local.removed}).catch(() => {});
+  }
+  recompute();
 }
 
 function persistWords(){
+  S.local.words = S.words;
   store.write('words', {edits:S.words.edits, hidden:S.words.hidden, custom:S.words.custom})
     .catch(() => toast('Ændringen kunne ikke gemmes. Prøv igen.'));
 }
@@ -590,7 +658,12 @@ async function saveBlob(id, blob){
     if (blob.size > MAX_BYTES){ toast('Lyden er for lang. Hold den under ' + MAX_SEC + ' sekunder.'); return; }
     const url = await blobToDataUrl(blob);
     if (!/^data:(audio|video)\//.test(url)){ toast('Filen er ikke en lydfil.'); return; }
-    S.clips[id] = {audio:url};
+    S.local.clips[id] = {audio:url};
+    if (S.local.removed.includes(id)){
+      S.local.removed = S.local.removed.filter(x => x !== id);
+      store.write('removed', {ids:S.local.removed}).catch(() => {});
+    }
+    recompute();
     try { await store.write('clip-' + id, {audio:url, at:Date.now()}); }
     catch (e) { toast(e && e.code === 'quota_exceeded' ? 'Der er ikke mere plads. Slet nogle optagelser.' : 'Optagelsen kunne ikke gemmes. Prøv igen.'); }
     playWord(id);
@@ -625,7 +698,9 @@ function topbar(title, extra, right){
 }
 const starPill = pid => '<span class="pill" aria-label="' + starsOf(pid) + ' stjerner"><span class="star" aria-hidden="true">★</span> ' + starsOf(pid) + '</span>';
 
-function statusLine(){
+function statusLine(home){
+  if (home && store.mode !== 'loading' && Object.keys(S.site.clips).length)
+    return '<p class="status" data-status>Lyden hentes fra hjemmesiden.</p>';
   const t = {
     loading:'Henter optagelser…',
     cloud:'Optagelserne gemmes i din Claude-konto og virker på alle enheder, hvor du er logget ind.',
@@ -650,7 +725,7 @@ function vHome(){
       '<button class="btn hold" type="button" data-hold><span class="fill" aria-hidden="true"></span><span class="lbl">Forælder</span></button>' +
       '<p class="hint">Hold knappen inde for at indtale ord</p>' +
     '</div>' +
-    statusLine() +
+    statusLine(true) +
   '</main>';
 }
 
@@ -817,6 +892,7 @@ function vParent(){
         (['denied','busy','nomic','blocked'].includes(S.micReason) ? '<button class="btn ghost" data-action="retrymic">Prøv mikrofonen igen</button>' : '') + '</div>' : '') +
       statusLine() +
     '</section>' +
+    shareSection() +
     '<section class="pgroup" style="--c:var(--teal)" data-kids aria-labelledby="g-kids">' +
       '<h2 id="g-kids">Børnene</h2>' +
       '<p class="hint">Navnene gemmes kun på denne enhed. Det lille barn ser billeder og hører lyd. Det store barn ser også arabisk skrift.</p>' +
@@ -846,6 +922,23 @@ function vParent(){
       '</div>' +
     '</section>' +
   '</main>';
+}
+
+function shareSection(){
+  const n = Object.keys(S.site.clips).length;
+  const when = S.site.savedAt ? new Date(S.site.savedAt).toLocaleDateString('da-DK', {day:'numeric', month:'long', year:'numeric'}) : '';
+  return '<section class="pgroup" style="--c:var(--saffron)" data-share aria-labelledby="g-share">' +
+    '<h2 id="g-share">Del med børnenes iPads</h2>' +
+    '<p class="hint">' + (S.site.savedAt ? 'Hjemmesiden har lyd til ' + n + ' ord, gemt ' + when + '.' : 'Der ligger ingen lydfil på hjemmesiden endnu.') + '</p>' +
+    (hasUnpublished() ? '<p class="note">Der er ændringer på denne enhed, som ikke er lagt på hjemmesiden endnu.</p>' : '') +
+    '<ol class="steps">' +
+      '<li>Tryk Gem fil til hjemmesiden. Filen skal hedde præcis kalimati-lyd.json, så omdøb den, hvis der er kommet et tal på.</li>' +
+      '<li>Upload filen til dit Kalimati-repo på GitHub med Add file og Upload files. Den erstatter den gamle fil.</li>' +
+      '<li>Efter højst ca. 10 minutter har alle enheder den nye lyd.</li>' +
+    '</ol>' +
+    '<p class="hint">Filen er offentlig ligesom resten af siden. Navne og stjerner kommer ikke med.</p>' +
+    '<div class="form-btns"><button class="btn" type="button" data-action="exportsite">Gem fil til hjemmesiden</button></div>' +
+  '</section>';
 }
 
 function render(){
@@ -964,15 +1057,23 @@ function focusFirstField(sel){
 }
 
 /* ---------- Backup ---------- */
+function download(text, filename){
+  const blob = new Blob([text], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+function exportSite(){
+  const data = {app:'kalimati', kind:'site', version:1, savedAt:new Date().toISOString(), clips:S.clips, words:S.words};
+  download(JSON.stringify(data), 'kalimati-lyd.json');
+  toast('Filen gemmes i dine overførsler. Upload den til GitHub.');
+}
 function exportBackup(){
   const data = {app:'kalimati', version:1, savedAt:new Date().toISOString(), clips:S.clips, words:S.words, stars:S.stars,
     players:{small:{name:PLAYERS.small.name, ar:PLAYERS.small.ar}, big:{name:PLAYERS.big.name, ar:PLAYERS.big.ar}}};
-  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'kalimati-' + new Date().toISOString().slice(0, 10) + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  download(JSON.stringify(data), 'kalimati-' + new Date().toISOString().slice(0, 10) + '.json');
   toast('Sikkerhedskopien gemmes i dine overførsler.');
 }
 async function importBackup(file){
@@ -983,8 +1084,9 @@ async function importBackup(file){
   const flat = {words:d.words || {}, progress:{stars:d.stars || {}}, players:d.players || {}};
   for (const [id, c] of Object.entries(d.clips || {})) if (c && typeof c.audio === 'string') flat['clip-' + id] = {audio:c.audio};
   applyLoaded(flat);
+  S.local.words = S.words;
   try {
-    for (const [id, c] of Object.entries(S.clips)) await store.write('clip-' + id, {audio:c.audio, at:Date.now()});
+    for (const [id, c] of Object.entries(S.local.clips)) await store.write('clip-' + id, {audio:c.audio, at:Date.now()});
     await store.write('words', {edits:S.words.edits, hidden:S.words.hidden, custom:S.words.custom});
     await store.write('progress', {stars:{...S.stars}});
     await store.write('players', {small:{name:PLAYERS.small.name, ar:PLAYERS.small.ar}, big:{name:PLAYERS.big.name, ar:PLAYERS.big.ar}});
@@ -1032,15 +1134,14 @@ document.addEventListener('click', e => {
     }
     case 'delclip':
       if (needConfirm(el, 'clip:' + id, 'Tryk igen for at slette')) return;
-      delete S.clips[id];
-      store.write('clip-' + id, null).catch(() => toast('Optagelsen kunne ikke slettes. Prøv igen.'));
+      removeClip(id);
       rerender(); toast('Optagelsen er slettet.');
       break;
     case 'delword':
       if (needConfirm(el, 'word:' + id, 'Tryk igen for at fjerne')) return;
       if (id.startsWith('c-')) S.words.custom = S.words.custom.filter(w => w.id !== id);
       else { if (!S.words.hidden.includes(id)) S.words.hidden.push(id); delete S.words.edits[id]; }
-      if (S.clips[id]){ delete S.clips[id]; store.write('clip-' + id, null).catch(() => {}); }
+      if (S.clips[id]) removeClip(id);
       S.editing = null; persistWords(); rerender(); toast('Ordet er fjernet.');
       break;
     case 'add':
@@ -1050,6 +1151,7 @@ document.addEventListener('click', e => {
     case 'canceladd': S.adding = null; rerender(); break;
     case 'retrymic': S.mic = 'unknown'; S.micReason = null; rerender(); toast('Tryk Optag ved et ord for at prøve igen.'); break;
     case 'export': exportBackup(); break;
+    case 'exportsite': exportSite(); break;
     case 'savekids': {
       const box = el.closest('[data-kids]');
       const val = n => { const i = box.querySelector('[name="' + n + '"]'); return i ? i.value.trim() : ''; };
@@ -1119,7 +1221,7 @@ if ('serviceWorker' in navigator && !window.claude && (location.protocol === 'ht
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
 render();
-store.init().then(data => {
+Promise.all([store.init(), loadSite()]).then(([data]) => {
   applyLoaded(data);
   if (S.editing || S.adding || S.view === 'game'){
     const st = app.querySelector('[data-status]'); if (st) st.outerHTML = statusLine();
