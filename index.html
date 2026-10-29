@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalimati</title>
+<meta name="theme-color" content="#1F6F6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kalimati">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E3EBE7;
+  --surface:#F5F8F6;
+  --tile-bg:#FAFCFB;
+  --grout:#C9D5CF;
+  --ink:#1C2745;
+  --ink-soft:#56627D;
+  --on-accent:#1C2745;
+  --on-strong:#FFFFFF;
+  --teal:#1F6F6B;
+  --pom:#C3363F;
+  --olive:#6E8A2C;
+  --saffron:#E0A12A;
+  --indigo:#2E4C8E;
+  --plum:#8A3E77;
+  --font:"Baloo Bhaijaan 2","Noto Sans Arabic","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131A2B; --surface:#1B2439; --tile-bg:#212B44; --grout:#0C1220;
+    --ink:#EDF0F6; --ink-soft:#A7B0C6; --on-accent:#131A2B; --on-strong:#131A2B;
+    --teal:#3EA39B; --pom:#E15A62; --olive:#9BB54C; --saffron:#EDB648; --indigo:#7090E0; --plum:#C477B2;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131A2B; --surface:#1B2439; --tile-bg:#212B44; --grout:#0C1220;
+  --ink:#EDF0F6; --ink-soft:#A7B0C6; --on-accent:#131A2B; --on-strong:#131A2B;
+  --teal:#3EA39B; --pom:#E15A62; --olive:#9BB54C; --saffron:#EDB648; --indigo:#7090E0; --plum:#C477B2;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.45}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--indigo);outline-offset:2px}
+[data-focus]:focus{outline:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+[lang="ar"]{font-family:var(--font)}
+
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 56px}
+
+/* Brand */
+.brand{text-align:center;margin:10px 0 4px}
+.logo{font-size:clamp(3rem,11vw,4.6rem);font-weight:800;line-height:1.1;margin:0;color:var(--teal)}
+.tag{margin:0;color:var(--ink-soft);font-weight:600}
+.ask{text-align:center;font-size:1.5rem;margin:26px 0 14px;font-weight:800}
+
+/* The tile floor: Levantine cement tiles laid edge to edge */
+.floor{display:grid;gap:0;border-radius:22px;overflow:hidden;border:3px solid var(--grout);background:var(--surface)}
+.floor.players{grid-template-columns:repeat(2,1fr);max-width:560px;margin:0 auto}
+.floor.themes{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.floor.words{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.floor.choices{max-width:600px;margin:0 auto}
+.floor.choices.c3{grid-template-columns:repeat(3,1fr)}
+.floor.choices.c4{grid-template-columns:repeat(2,1fr);max-width:460px}
+
+.tile{
+  --c:var(--teal);
+  --c-soft:color-mix(in srgb,var(--c) 42%,var(--tile-bg));
+  --c-wash:color-mix(in srgb,var(--c) 14%,var(--tile-bg));
+  position:relative;isolation:isolate;aspect-ratio:1/1;
+  border:0;margin:0;padding:14% 8%;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 0 0,var(--c) 0 12%,transparent 12.6%),
+    radial-gradient(circle at 100% 0,var(--c) 0 12%,transparent 12.6%),
+    radial-gradient(circle at 0 100%,var(--c) 0 12%,transparent 12.6%),
+    radial-gradient(circle at 100% 100%,var(--c) 0 12%,transparent 12.6%),
+    radial-gradient(circle at 0 0,transparent 0 16%,var(--c-soft) 16.4% 17.6%,transparent 18.2%),
+    radial-gradient(circle at 100% 0,transparent 0 16%,var(--c-soft) 16.4% 17.6%,transparent 18.2%),
+    radial-gradient(circle at 0 100%,transparent 0 16%,var(--c-soft) 16.4% 17.6%,transparent 18.2%),
+    radial-gradient(circle at 100% 100%,transparent 0 16%,var(--c-soft) 16.4% 17.6%,transparent 18.2%),
+    var(--tile-bg);
+  box-shadow:inset 0 0 0 1px var(--grout);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1em;
+  text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.tile::before{content:"";position:absolute;inset:22%;z-index:-1;background:var(--c-wash);transform:rotate(45deg);border-radius:12%}
+@media (hover:hover){.tile:not(.mute):hover::before{background:color-mix(in srgb,var(--c) 24%,var(--tile-bg))}}
+.tile:active{transform:scale(.97)}
+.tile:focus-visible{outline:4px solid var(--ink);outline-offset:-9px}
+.em{font-size:clamp(2.5rem,8vw,3.7rem);line-height:1.05}
+.name{font-weight:800;font-size:1.15rem;line-height:1.2}
+.player .ar.big{font-size:clamp(2.4rem,9vw,3.5rem);font-weight:800;line-height:1.15}
+.player .stars{font-weight:800;color:var(--ink-soft);font-size:1rem}
+.count{font-size:.78rem;color:var(--ink-soft);font-weight:600;line-height:1.2}
+.word .da{font-size:.92rem;font-weight:600;color:var(--ink-soft);line-height:1.2}
+.word .ar{font-size:1.35rem;font-weight:800;line-height:1.15}
+.word .tr{font-size:.85rem;color:var(--ink-soft);line-height:1.15}
+.ar-mode .word .em{font-size:clamp(2.1rem,7vw,3rem)}
+.tile.mute{cursor:default}
+.tile.mute .em{filter:grayscale(1);opacity:.4}
+.nosound{font-size:.72rem;color:var(--ink-soft);font-weight:600}
+.tile.pop{animation:pop .45s}
+.tile.nudge{animation:shake .4s}
+
+/* Top bar */
+.topbar{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;margin-bottom:16px}
+.tb-title{margin:0;font-size:1.5rem;font-weight:800;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;line-height:1.2}
+.tb-title .ar{font-size:1.35rem;color:var(--ink-soft)}
+.iconbtn{width:48px;height:48px;border-radius:50%;border:2px solid var(--grout);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;flex:none}
+.iconbtn svg{width:24px;height:24px}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.pill{background:var(--surface);border:2px solid var(--grout);border-radius:999px;padding:4px 14px;font-weight:800;white-space:nowrap}
+.pill .star,.star{color:var(--saffron)}
+.lead{font-size:1.25rem;margin:4px 0 12px;font-weight:800}
+
+/* Buttons */
+.btn{font-weight:800;font-size:1rem;min-height:44px;padding:8px 16px;border-radius:999px;border:2px solid transparent;background:var(--ink);color:var(--surface);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.45em;text-decoration:none;line-height:1.2}
+.btn svg{width:20px;height:20px;flex:none}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--grout)}
+.btn.danger{color:var(--pom)}
+.btn.big{font-size:1.25rem;min-height:56px;padding:10px 26px}
+.btn.big svg{width:26px;height:26px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.rec{background:var(--pom);color:var(--on-strong);min-width:8.4em}
+.btn.rec.has{background:transparent;color:var(--pom);border-color:color-mix(in srgb,var(--pom) 45%,transparent)}
+.btn.rec.on{background:var(--pom);color:var(--on-strong);animation:pulse 1s ease-in-out infinite}
+.btn.file input{display:none}
+@keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--pom) 30%,transparent)}}
+
+.playbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 16px}
+.hint{color:var(--ink-soft);margin:0;font-size:.95rem;max-width:60ch}
+.empty{background:var(--surface);border:2px dashed var(--grout);border-radius:18px;padding:22px;text-align:center;color:var(--ink-soft)}
+
+/* Game */
+.game .ask-area{display:flex;flex-direction:column;align-items:center;gap:14px;margin:6px 0 22px}
+.listen{width:128px;height:128px;border-radius:50%;border:0;background:var(--saffron);color:var(--on-accent);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 7px var(--bg),0 0 0 11px color-mix(in srgb,var(--saffron) 45%,var(--bg))}
+.listen svg{width:62px;height:62px}
+.listen:active{transform:scale(.96)}
+.reveal{min-height:3.4rem;text-align:center;line-height:1.15}
+.reveal .ar{display:block;font-size:2rem;font-weight:800}
+.reveal .tr{color:var(--ink-soft)}
+.reveal .em{font-size:2.2rem}
+.dots{list-style:none;display:flex;gap:6px;margin:0;padding:0;justify-content:center;flex-wrap:wrap}
+.dots li{width:12px;height:12px;border-radius:50%;background:var(--grout)}
+.dots li.done{background:var(--teal)}
+.dots li.now{background:var(--saffron)}
+.choice .em{font-size:clamp(3rem,12vw,4.6rem)}
+.choice.wrong{animation:shake .4s}
+.choice.wrong .em{opacity:.3;filter:grayscale(.8)}
+.choice.right{animation:pop .5s;z-index:2}
+.choice.fade{opacity:.35}
+.spark{position:absolute;left:50%;top:50%;font-size:1.4rem;line-height:1;color:var(--saffron);pointer-events:none;animation:spark .9s ease-out forwards}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes pop{40%{transform:scale(1.08)}}
+@keyframes spark{
+  from{transform:translate(-50%,-50%) rotate(var(--a)) translateY(0) rotate(calc(-1*var(--a)));opacity:1}
+  to{transform:translate(-50%,-50%) rotate(var(--a)) translateY(-92px) rotate(calc(-1*var(--a)));opacity:0}
+}
+.endcard{text-align:center;padding:24px 0}
+.bravo{font-size:clamp(3rem,12vw,4.5rem);font-weight:800;margin:0;color:var(--teal);line-height:1.1}
+.bravo-tr{margin:0;color:var(--ink-soft)}
+.endcard h2{font-size:1.6rem;margin:14px 0 0}
+.starrow{font-size:2.2rem;letter-spacing:.08em;color:var(--saffron);margin:8px 0;line-height:1.2}
+.starrow .off{color:var(--grout)}
+.row-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+
+/* Parent gate */
+.gate{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:34px}
+.hold{position:relative;overflow:hidden;background:transparent;color:var(--ink);border-color:var(--grout);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.hold .fill{position:absolute;inset:0;background:color-mix(in srgb,var(--teal) 32%,transparent);transform:scaleX(0);transform-origin:left center}
+.hold.holding .fill{transform:scaleX(1);transition:transform 1.2s linear}
+.hold .lbl{position:relative}
+.gate .hint{font-size:.85rem}
+.status{color:var(--ink-soft);font-size:.9rem;text-align:center;margin:18px 0 0}
+
+/* Parent view */
+.intro{background:var(--surface);border:2px solid var(--grout);border-radius:18px;padding:16px 18px;margin-bottom:24px;max-width:72ch}
+.intro p{margin:6px 0}
+.big-count{font-size:1.3rem}
+.intro .status{text-align:left;margin-top:10px}
+.note{background:color-mix(in srgb,var(--saffron) 20%,var(--surface));border-radius:12px;padding:10px 12px;margin:8px 0}
+.note p{margin:0 0 8px}
+.note p:last-child{margin:0}
+.pgroup > .hint{margin:0 0 10px}
+.pgroup{margin:0 0 28px}
+.pgroup h2{display:flex;align-items:center;gap:.5rem;font-size:1.3rem;margin:0 0 6px;padding-bottom:6px;border-bottom:3px solid var(--c)}
+.g-count{margin-left:auto;font-size:.9rem;color:var(--ink-soft);font-weight:600}
+.rows{list-style:none;margin:0 0 10px;padding:0}
+.row{display:grid;grid-template-columns:2.6rem 1fr auto;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--grout)}
+.r-em{font-size:1.8rem;text-align:center;line-height:1}
+.r-text{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.7rem;min-width:0}
+.r-da{font-weight:800}
+.r-ar{font-size:1.25rem;font-weight:600}
+.r-tr{color:var(--ink-soft);font-size:.9rem}
+.r-actions{display:flex;gap:8px;align-items:center}
+@media (max-width:520px){
+  .row{grid-template-columns:2.4rem 1fr}
+  .r-actions{grid-column:1/-1;justify-content:flex-end}
+}
+.row.editing{display:block;background:var(--surface);border-radius:14px;padding:14px;border:2px solid var(--c);margin:8px 0}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.fields label{display:flex;flex-direction:column;font-size:.85rem;font-weight:700;color:var(--ink-soft);gap:4px}
+.fields input{font:inherit;font-size:1.05rem;color:var(--ink);background:var(--tile-bg);border:2px solid var(--grout);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
+.fields input[name="emoji"]{font-size:1.5rem;padding:4px 10px}
+.form-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:14px;font-weight:600;max-width:min(92vw,520px);z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.2);text-align:center}
+.toast[hidden]{display:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p style="padding:20px">Appen kræver JavaScript.</p></noscript>
+
+<script>
+(() => {
+'use strict';
+
+const MAX_SEC = 8;
+const MAX_BYTES = 170 * 1024;
+const ROUNDS = 8;
+
+const THEMES = [
+  {id:'hilsner', name:'Hilsner', emoji:'👋', c:'var(--teal)'},
+  {id:'familie', name:'Familie', emoji:'🏡', c:'var(--pom)'},
+  {id:'dyr',     name:'Dyr',     emoji:'🐾', c:'var(--olive)'},
+  {id:'mad',     name:'Mad',     emoji:'🍞', c:'var(--saffron)'},
+  {id:'farver',  name:'Farver',  emoji:'🎨', c:'var(--indigo)'},
+  {id:'fodbold', name:'Fodbold', emoji:'⚽', c:'var(--plum)'}
+];
+const MIXED = {id:'alle', name:'Blandet', emoji:'🎲', c:'var(--teal)'};
+
+const PLAYER_DEFAULTS = {small:'Lillebror', big:'Storebror'};
+const PLAYERS = {
+  small: {id:'small', name:PLAYER_DEFAULTS.small, ar:'', choices:3, showArabic:false, color:'var(--saffron)'},
+  big:   {id:'big',   name:PLAYER_DEFAULTS.big,   ar:'', choices:4, showArabic:true,  color:'var(--teal)'}
+};
+
+const slug = s => s.toLowerCase().replace(/æ/g,'ae').replace(/ø/g,'oe').replace(/å/g,'aa').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+const SEED = [
+  ['hilsner','hej','مرحبا','marhaba','👋'],
+  ['hilsner','tak','شكراً','shukran','🙏'],
+  ['hilsner','godmorgen','صباح الخير','sabah il-kheir','🌅'],
+  ['hilsner','godnat','تصبح على خير','tisbah 3ala kheir','🌙'],
+  ['hilsner','ja','إيه','eh','👍'],
+  ['hilsner','nej','لأ','la2','✋'],
+  ['hilsner','jeg elsker dig','بحبّك','bahebbak','❤️'],
+  ['familie','mor','ماما','mama','👩'],
+  ['familie','far','بابا','baba','👨'],
+  ['familie','bedstemor','تيتا','teta','👵'],
+  ['familie','bedstefar','جدّو','jiddo','👴'],
+  ['familie','bror','خيّي','khayyi','👦'],
+  ['familie','baby','بيبي','bebe','👶'],
+  ['dyr','kat','بسّة','bisse','🐱'],
+  ['dyr','hund','كلب','kalb','🐶'],
+  ['dyr','hest','حصان','hsan','🐴'],
+  ['dyr','fugl','عصفور','3asfour','🐦'],
+  ['dyr','fisk','سمكة','samake','🐟'],
+  ['dyr','ko','بقرة','ba2ara','🐄'],
+  ['dyr','løve','أسد','asad','🦁'],
+  ['mad','brød','خبز','khebez','🍞'],
+  ['mad','vand','ميّ','mayy','💧'],
+  ['mad','mælk','حليب','halib','🥛'],
+  ['mad','æble','تفّاحة','tiffaha','🍎'],
+  ['mad','banan','موزة','moze','🍌'],
+  ['mad','oliven','زيتون','zeitoun','🫒'],
+  ['farver','rød','أحمر','ahmar','🔴'],
+  ['farver','blå','أزرق','azra2','🔵'],
+  ['farver','grøn','أخضر','akhdar','🟢'],
+  ['farver','gul','أصفر','asfar','🟡'],
+  ['farver','hvid','أبيض','abyad','⚪'],
+  ['farver','sort','أسود','aswad','⚫'],
+  ['fodbold','bold','طابة','tabe','⚽'],
+  ['fodbold','spiller','لاعب','la3eb','🏃'],
+  ['fodbold','sko','كندرة','kundara','👟'],
+  ['fodbold','pokal','كاس','kas','🏆'],
+  ['fodbold','trøje','قميص','2amis','👕']
+].map(([theme,da,ar,tr,emoji]) => ({id: theme + '-' + slug(da), theme, da, ar, tr, emoji}));
+const SEED_IDS = new Set(SEED.map(w => w.id));
+
+const ICON = {
+  back:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  close:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  speaker:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9h4l5-4v14l-5-4h-4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  stop:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></svg>',
+  target:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/></svg>',
+  file:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 20h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+const S = {
+  view:'home', player:null, theme:null,
+  clips:{},
+  words:{edits:{}, hidden:[], custom:[]},
+  stars:{},
+  mic:'unknown',
+  saving:null,
+  editing:null, adding:null,
+  game:null
+};
+
+const app = document.getElementById('app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Words ---------- */
+function allWords(){
+  const out = [];
+  for (const w of SEED){
+    if (S.words.hidden.includes(w.id)) continue;
+    const e = S.words.edits[w.id] || {};
+    out.push({...w, da:e.da || w.da, ar:e.ar != null ? e.ar : w.ar, tr:e.tr != null ? e.tr : w.tr, emoji:e.emoji || w.emoji});
+  }
+  for (const w of S.words.custom) out.push({...w});
+  return out;
+}
+const themeOf = id => THEMES.find(t => t.id === id) || MIXED;
+const themeWords = tid => tid === 'alle' ? allWords() : allWords().filter(w => w.theme === tid);
+const byId = id => allWords().find(w => w.id === id);
+const starsOf = pid => S.stars[pid] || 0;
+
+/* ---------- Storage: Claude account (db) with browser fallback ---------- */
+function idbOpen(){
+  return new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('no-idb'));
+    const r = indexedDB.open('kalimati', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+    r.onblocked = () => rej(new Error('blocked'));
+  });
+}
+function idbAll(db){
+  return new Promise((res, rej) => {
+    const out = {};
+    const tx = db.transaction('kv', 'readonly');
+    const r = tx.objectStore('kv').openCursor();
+    r.onsuccess = () => { const c = r.result; if (c){ out[c.key] = c.value; c.continue(); } };
+    tx.oncomplete = () => res(out);
+    tx.onerror = () => rej(tx.error);
+  });
+}
+function idbPut(db, key, value){
+  return new Promise((res, rej) => {
+    const tx = db.transaction('kv', 'readwrite');
+    const st = tx.objectStore('kv');
+    if (value === null) st.delete(key); else st.put(value, key);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+    tx.onabort = () => rej(tx.error);
+  });
+}
+
+const store = {
+  mode:'loading', col:null, idb:null, chains:{},
+  async init(){
+    let db = null, uid = null;
+    if (window.claude && typeof window.claude.use === 'function'){
+      try {
+        const timeout = sleep(12000).then(() => null);
+        const [d, u] = await Promise.all([
+          Promise.race([window.claude.use('db'), timeout]),
+          Promise.race([window.claude.use('user'), timeout])
+        ]);
+        db = d;
+        if (db && u) uid = await u.id();
+      } catch (e) { db = null; }
+    }
+    if (db && uid){
+      try {
+        this.col = db.collection('data/users/' + uid);
+        const snap = await this.col.limit(1000).get();
+        const out = {};
+        snap.docs.forEach(d => { if (d.exists) out[d.id] = JSON.parse(JSON.stringify(d.data())); });
+        this.mode = 'cloud';
+        return out;
+      } catch (e) { this.col = null; }
+    }
+    try {
+      this.idb = await idbOpen();
+      try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+      const out = await idbAll(this.idb);
+      this.mode = 'local';
+      return out;
+    } catch (e) {
+      this.mode = 'memory';
+      return {};
+    }
+  },
+  write(key, value){
+    const run = async () => {
+      if (this.mode === 'cloud'){
+        const ref = this.col.doc(key);
+        const once = () => value === null ? ref.delete() : ref.set(value);
+        try { await once(); }
+        catch (e) {
+          if (e && e.code === 'unavailable'){ await sleep(400 + Math.random() * 600); await once(); }
+          else throw e;
+        }
+      } else if (this.mode === 'local'){
+        await idbPut(this.idb, key, value);
+      }
+    };
+    const p = (this.chains[key] || Promise.resolve()).catch(() => {}).then(run);
+    this.chains[key] = p;
+    return p;
+  }
+};
+
+function applyLoaded(data){
+  const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+  const arr = v => Array.isArray(v) ? v : [];
+  const str = v => typeof v === 'string' ? v.slice(0, 80) : '';
+  for (const [k, v] of Object.entries(data)){
+    if (k.startsWith('clip-') && /^[a-z0-9-]+$/.test(k.slice(5)) && v && typeof v.audio === 'string' && /^data:(audio|video)\//.test(v.audio)){
+      S.clips[k.slice(5)] = {audio:v.audio};
+    } else if (k === 'words' && v){
+      const edits = {};
+      for (const [id, e] of Object.entries(obj(v.edits))){
+        if (SEED_IDS.has(id) && e && typeof e === 'object') edits[id] = {da:str(e.da), ar:str(e.ar), tr:str(e.tr), emoji:str(e.emoji)};
+      }
+      const hidden = arr(v.hidden).filter(id => SEED_IDS.has(id));
+      const custom = arr(v.custom).filter(w => w && /^c-[a-z0-9]+$/.test(w.id) && THEMES.some(t => t.id === w.theme))
+        .map(w => ({id:w.id, theme:w.theme, da:str(w.da), ar:str(w.ar), tr:str(w.tr), emoji:str(w.emoji) || '⭐'}));
+      S.words = {edits, hidden, custom};
+    } else if (k === 'players' && v){
+      for (const pid of Object.keys(PLAYERS)){
+        const e = obj(v[pid]);
+        PLAYERS[pid].name = str(e.name).slice(0, 24) || PLAYER_DEFAULTS[pid];
+        PLAYERS[pid].ar = str(e.ar).slice(0, 24);
+      }
+    } else if (k === 'progress' && v){
+      const st = obj(v.stars);
+      for (const pid of Object.keys(PLAYERS)) if (Number.isFinite(st[pid])) S.stars[pid] = Math.max(0, Math.floor(st[pid]));
+    }
+  }
+}
+
+function persistWords(){
+  store.write('words', {edits:S.words.edits, hidden:S.words.hidden, custom:S.words.custom})
+    .catch(() => toast('Ændringen kunne ikke gemmes. Prøv igen.'));
+}
+let progressTimer = null;
+function persistStars(){
+  clearTimeout(progressTimer);
+  progressTimer = setTimeout(() => { store.write('progress', {stars:{...S.stars}}).catch(() => {}); }, 1200);
+}
+
+/* ---------- Sound ---------- */
+let currentAudio = null;
+function playWord(id){
+  const c = S.clips[id];
+  if (!c) return false;
+  try {
+    if (currentAudio){ currentAudio.pause(); }
+    currentAudio = new Audio(c.audio);
+    const p = currentAudio.play();
+    if (p && p.catch) p.catch(err => { if (err && err.name !== 'AbortError') toast('Lyden kan ikke afspilles på denne enhed.'); });
+  } catch (e) { toast('Lyden kan ikke afspilles på denne enhed.'); }
+  return true;
+}
+let actx = null;
+function tones(freqs, type, dur, gap, vol){
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    const t0 = actx.currentTime + 0.02;
+    freqs.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f;
+      const t = t0 + i * gap;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    });
+  } catch (e) {}
+}
+const chime = () => tones([523.25, 659.25, 783.99, 1046.5], 'triangle', 0.16, 0.08, 0.16);
+const boop = () => tones([233, 196], 'sine', 0.2, 0.13, 0.14);
+const fanfare = () => tones([392, 523.25, 659.25, 783.99, 659.25, 1046.5], 'triangle', 0.22, 0.12, 0.15);
+
+/* ---------- Recording ---------- */
+let rec = null;
+function recLabel(id){
+  if (rec && rec.id === id) return ICON.stop + '<span>Stop ' + rec.left + '</span>';
+  if (S.saving === id) return '<span>Gemmer…</span>';
+  return ICON.mic + '<span>' + (S.clips[id] ? 'Optag igen' : 'Optag') + '</span>';
+}
+function updateRecButton(id){
+  const b = app.querySelector('[data-action="rec"][data-id="' + id + '"]');
+  if (!b) return;
+  b.innerHTML = recLabel(id);
+  b.classList.toggle('on', !!(rec && rec.id === id));
+  b.disabled = S.saving === id;
+}
+async function toggleRecord(id){
+  if (rec){ stopRecording(); return; }
+  if (S.saving) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof window.MediaRecorder === 'undefined'){ micBlocked(null); return; }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+  } catch (e) { micBlocked(e); return; }
+  const types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'];
+  const mime = types.find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+  let mr;
+  try { mr = new MediaRecorder(stream, mime ? {mimeType:mime, audioBitsPerSecond:48000} : {audioBitsPerSecond:48000}); }
+  catch (e) { try { mr = new MediaRecorder(stream); } catch (e2) { stream.getTracks().forEach(t => t.stop()); micBlocked(null); return; } }
+  const chunks = [];
+  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    const blob = new Blob(chunks, {type: (mr.mimeType || mime || 'audio/webm')});
+    saveBlob(id, blob);
+  };
+  S.mic = 'ok';
+  rec = {id, mr, left:MAX_SEC, timer:null};
+  rec.timer = setInterval(() => {
+    if (!rec) return;
+    rec.left -= 1;
+    if (rec.left <= 0) stopRecording(); else updateRecButton(rec.id);
+  }, 1000);
+  mr.start();
+  updateRecButton(id);
+}
+function stopRecording(){
+  if (!rec) return;
+  const r = rec; rec = null;
+  clearInterval(r.timer);
+  S.saving = r.id;
+  try { if (r.mr.state !== 'inactive') r.mr.stop(); } catch (e) { S.saving = null; }
+  updateRecButton(r.id);
+}
+const MIC_TEXT = {
+  policy:'Mikrofonen er spærret i denne visning. Åbn appen fra sin egen adresse, eller vælg en lydfil.',
+  denied:'Appen har ikke fået lov til at bruge mikrofonen. Giv adgang i browserens indstillinger for siden, og prøv igen.',
+  nomic:'Der blev ikke fundet nogen mikrofon på enheden.',
+  busy:'Mikrofonen bruges af et andet program. Luk det, og prøv igen.',
+  insecure:'Mikrofonen virker kun, når siden er åbnet via https.',
+  blocked:'Mikrofonen kan ikke bruges her. Vælg en lydfil i stedet.'
+};
+function micBlocked(err){
+  const name = err && err.name;
+  let reason = 'blocked';
+  if (!window.isSecureContext) reason = 'insecure';
+  else if (name === 'NotFoundError' || name === 'OverconstrainedError') reason = 'nomic';
+  else if (name === 'NotReadableError' || name === 'AbortError') reason = 'busy';
+  else if (name === 'NotAllowedError' || name === 'SecurityError'){
+    const pol = document.permissionsPolicy || document.featurePolicy;
+    reason = (pol && pol.allowsFeature && !pol.allowsFeature('microphone')) ? 'policy' : 'denied';
+  }
+  S.mic = 'blocked'; S.micReason = reason;
+  toast(MIC_TEXT[reason]);
+  rerender();
+}
+function blobToDataUrl(blob){
+  return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(blob); });
+}
+async function saveBlob(id, blob){
+  S.saving = id;
+  try {
+    if (blob.size < 1200){ toast('Optagelsen blev tom. Prøv igen.'); return; }
+    if (blob.size > MAX_BYTES){ toast('Lyden er for lang. Hold den under ' + MAX_SEC + ' sekunder.'); return; }
+    const url = await blobToDataUrl(blob);
+    if (!/^data:(audio|video)\//.test(url)){ toast('Filen er ikke en lydfil.'); return; }
+    S.clips[id] = {audio:url};
+    try { await store.write('clip-' + id, {audio:url, at:Date.now()}); }
+    catch (e) { toast(e && e.code === 'quota_exceeded' ? 'Der er ikke mere plads. Slet nogle optagelser.' : 'Optagelsen kunne ikke gemmes. Prøv igen.'); }
+    playWord(id);
+  } catch (e) {
+    toast('Optagelsen kunne ikke gemmes. Prøv igen.');
+  } finally {
+    S.saving = null;
+    afterClipChange(id);
+  }
+}
+function handleUpload(id, file){
+  if (!file) return;
+  if (!/^(audio|video)\//.test(file.type || '')){ toast('Vælg en lydfil.'); return; }
+  saveBlob(id, file);
+}
+function afterClipChange(id){
+  if (S.view !== 'parent') return;
+  if (S.editing || S.adding){
+    const li = app.querySelector('[data-row="' + id + '"]');
+    const w = byId(id);
+    if (li && w && S.editing !== id) li.outerHTML = rowHtml(w);
+    else updateRecButton(id);
+  } else rerender();
+}
+
+/* ---------- Views ---------- */
+function topbar(title, extra, right){
+  return '<div class="topbar">' +
+    '<button class="iconbtn" data-action="back" aria-label="Tilbage">' + ICON.back + '</button>' +
+    '<h1 class="tb-title" tabindex="-1" data-focus>' + title + (extra || '') + '</h1>' +
+    (right == null ? '<span></span>' : right) + '</div>';
+}
+const starPill = pid => '<span class="pill" aria-label="' + starsOf(pid) + ' stjerner"><span class="star" aria-hidden="true">★</span> ' + starsOf(pid) + '</span>';
+
+function statusLine(){
+  const t = {
+    loading:'Henter optagelser…',
+    cloud:'Optagelserne gemmes i din Claude-konto og virker på alle enheder, hvor du er logget ind.',
+    local:'Optagelserne gemmes kun på denne enhed. Tag en sikkerhedskopi en gang imellem.',
+    memory:'Optagelserne kan ikke gemmes her og forsvinder, når siden lukkes.'
+  }[store.mode];
+  return '<p class="status" data-status>' + t + '</p>';
+}
+
+function vHome(){
+  return '<main class="wrap home">' +
+    '<header class="brand"><p class="logo" lang="ar" dir="rtl">كلماتي</p><p class="tag">Vores arabiske ord</p></header>' +
+    '<h1 class="ask" tabindex="-1" data-focus>Hvem skal lege?</h1>' +
+    '<div class="floor players">' + Object.values(PLAYERS).map(p =>
+      '<button class="tile player" data-action="player" data-id="' + p.id + '" style="--c:' + p.color + '">' +
+        (p.ar ? '<span class="ar big" lang="ar" dir="rtl">' + esc(p.ar) + '</span><span class="name">' + esc(p.name) + '</span>'
+              : '<span class="ar big">' + esc(p.name) + '</span>') +
+        '<span class="stars"><span class="star" aria-hidden="true">★</span> ' + starsOf(p.id) + '</span>' +
+      '</button>').join('') +
+    '</div>' +
+    '<div class="gate">' +
+      '<button class="btn hold" type="button" data-hold><span class="fill" aria-hidden="true"></span><span class="lbl">Forælder</span></button>' +
+      '<p class="hint">Hold knappen inde for at indtale ord</p>' +
+    '</div>' +
+    statusLine() +
+  '</main>';
+}
+
+function vThemes(){
+  const p = PLAYERS[S.player];
+  const list = THEMES.concat([MIXED]);
+  return '<main class="wrap">' +
+    topbar(esc(p.name), p.ar ? ' <span class="ar" lang="ar" dir="rtl">' + esc(p.ar) + '</span>' : '', starPill(p.id)) +
+    '<h2 class="lead">Vælg et tema</h2>' +
+    '<div class="floor themes">' + list.map(t => {
+      const ws = themeWords(t.id);
+      const n = ws.filter(w => S.clips[w.id]).length;
+      return '<button class="tile theme" data-action="theme" data-id="' + t.id + '" style="--c:' + t.c + '">' +
+        '<span class="em" aria-hidden="true">' + t.emoji + '</span>' +
+        '<span class="name">' + t.name + '</span>' +
+        '<span class="count">' + n + ' af ' + ws.length + ' med lyd</span></button>';
+    }).join('') + '</div>' +
+  '</main>';
+}
+
+function wordTile(w, p){
+  const t = themeOf(w.theme);
+  const has = !!S.clips[w.id];
+  return '<button class="tile word' + (has ? '' : ' mute') + '" data-action="say" data-id="' + w.id + '" style="--c:' + t.c + '" aria-label="' + esc(w.da) + (has ? '' : ', ingen lyd endnu') + '">' +
+    '<span class="em" aria-hidden="true">' + esc(w.emoji) + '</span>' +
+    (p.showArabic && w.ar ? '<span class="ar" lang="ar" dir="rtl">' + esc(w.ar) + '</span>' : '') +
+    (p.showArabic && w.tr ? '<span class="tr">' + esc(w.tr) + '</span>' : '') +
+    '<span class="da">' + esc(w.da) + '</span>' +
+    (has ? '' : '<span class="nosound">ingen lyd endnu</span>') +
+  '</button>';
+}
+
+function vWords(){
+  const p = PLAYERS[S.player], t = themeOf(S.theme), ws = themeWords(t.id);
+  const n = ws.filter(w => S.clips[w.id]).length;
+  const canPlay = n >= 3;
+  return '<main class="wrap">' +
+    topbar('<span aria-hidden="true">' + t.emoji + '</span> ' + t.name, '', starPill(p.id)) +
+    '<div class="playbar">' +
+      '<button class="btn big" data-action="startgame"' + (canPlay ? '' : ' disabled') + '>' + ICON.target + '<span>Leg</span></button>' +
+      '<p class="hint">' + (canPlay ? 'Tryk på et billede for at høre ordet. Tryk Leg for at finde det rigtige billede.' : 'Der skal være lyd på mindst 3 ord i temaet, før I kan lege. En voksen indtaler dem under Forælder.') + '</p>' +
+    '</div>' +
+    (ws.length
+      ? '<div class="floor words' + (p.showArabic ? ' ar-mode' : '') + '">' + ws.map(w => wordTile(w, p)).join('') + '</div>'
+      : '<p class="empty">Temaet har ingen ord endnu. Tilføj nogle under Forælder.</p>') +
+  '</main>';
+}
+
+function revealHtml(){
+  const g = S.game, p = PLAYERS[S.player];
+  if (!g || !g.solved) return '';
+  const w = byId(g.target);
+  if (!w) return '';
+  if (p.showArabic && w.ar) return '<span class="ar" lang="ar" dir="rtl">' + esc(w.ar) + '</span>' + (w.tr ? '<span class="tr">' + esc(w.tr) + '</span>' : '');
+  return '<span class="em" aria-hidden="true">' + esc(w.emoji) + '</span><span class="sr">' + esc(w.da) + '</span>';
+}
+function dotsHtml(){
+  const g = S.game;
+  let s = '';
+  for (let i = 1; i <= g.total; i++){
+    const cls = i < g.round || (i === g.round && g.solved) ? 'done' : (i === g.round ? 'now' : '');
+    s += '<li class="' + cls + '"></li>';
+  }
+  return '<ol class="dots" aria-label="Runde ' + g.round + ' af ' + g.total + '">' + s + '</ol>';
+}
+
+function vGame(){
+  const g = S.game, p = PLAYERS[S.player];
+  if (g.done){
+    return '<main class="wrap game">' +
+      '<div class="endcard">' +
+        '<p class="bravo" lang="ar" dir="rtl">برافو!</p>' +
+        '<p class="bravo-tr">bravo</p>' +
+        '<h1 tabindex="-1" data-focus>Godt gået, ' + esc(p.name) + '!</h1>' +
+        '<div class="starrow" aria-label="' + g.earned + ' af ' + g.total + ' stjerner">' +
+          '★'.repeat(g.earned) + '<span class="off">' + '★'.repeat(g.total - g.earned) + '</span></div>' +
+        '<div class="row-btns">' +
+          '<button class="btn big" data-action="startgame">Spil igen</button>' +
+          '<button class="btn big ghost" data-action="back">Tilbage til ordene</button>' +
+        '</div>' +
+      '</div></main>';
+  }
+  return '<main class="wrap game">' +
+    '<div class="topbar">' +
+      '<button class="iconbtn" data-action="back" aria-label="Stop spillet">' + ICON.close + '</button>' +
+      dotsHtml() +
+      '<span data-starpill>' + starPill(p.id) + '</span>' +
+    '</div>' +
+    '<h1 class="sr" tabindex="-1" data-focus>Lyt og find billedet</h1>' +
+    '<div class="ask-area">' +
+      '<button class="listen" data-action="listen" aria-label="Lyt igen">' + ICON.speaker + '</button>' +
+      '<div class="reveal" aria-live="polite" data-reveal>' + revealHtml() + '</div>' +
+    '</div>' +
+    '<div class="floor choices c' + p.choices + '">' + g.choices.map(id => {
+      const w = byId(id);
+      if (!w) return '';
+      const st = g.wrong.includes(id) ? ' wrong' : '';
+      return '<button class="tile choice' + st + '" data-action="choose" data-id="' + id + '" style="--c:' + themeOf(w.theme).c + '" aria-label="' + esc(w.da) + '">' +
+        '<span class="em" aria-hidden="true">' + esc(w.emoji) + '</span></button>';
+    }).join('') + '</div>' +
+  '</main>';
+}
+
+function recControl(id){
+  if (S.mic === 'blocked'){
+    return '<label class="btn rec file' + (S.clips[id] ? ' has' : '') + '">' + ICON.file + '<span>Vælg lyd</span>' +
+      '<input type="file" accept="audio/*" data-upload="' + id + '"></label>';
+  }
+  const has = !!S.clips[id];
+  const on = !!(rec && rec.id === id);
+  return '<button class="btn rec' + (has && !on ? ' has' : '') + (on ? ' on' : '') + '" data-action="rec" data-id="' + id + '"' + (S.saving === id ? ' disabled' : '') + '>' + recLabel(id) + '</button>';
+}
+function rowHtml(w){
+  if (S.editing === w.id) return editHtml(w);
+  const has = !!S.clips[w.id];
+  return '<li class="row" data-row="' + w.id + '">' +
+    '<span class="r-em" aria-hidden="true">' + esc(w.emoji) + '</span>' +
+    '<span class="r-text"><b class="r-da">' + esc(w.da) + '</b>' +
+      (w.ar ? '<span class="r-ar" lang="ar" dir="rtl">' + esc(w.ar) + '</span>' : '') +
+      (w.tr ? '<span class="r-tr">' + esc(w.tr) + '</span>' : '') + '</span>' +
+    '<span class="r-actions">' + recControl(w.id) +
+      '<button class="iconbtn" data-action="play" data-id="' + w.id + '" aria-label="Afspil ' + esc(w.da) + '"' + (has ? '' : ' disabled') + '>' + ICON.play + '</button>' +
+      '<button class="iconbtn" data-action="edit" data-id="' + w.id + '" aria-label="Ret ' + esc(w.da) + '">' + ICON.edit + '</button>' +
+    '</span></li>';
+}
+function fieldsHtml(w){
+  return '<div class="fields">' +
+    '<label>Billede (emoji)<input name="emoji" value="' + esc(w.emoji) + '" maxlength="8" autocomplete="off"></label>' +
+    '<label>Dansk<input name="da" value="' + esc(w.da) + '" maxlength="40" autocomplete="off"></label>' +
+    '<label>Arabisk<input name="ar" value="' + esc(w.ar) + '" maxlength="60" dir="rtl" lang="ar" autocomplete="off"></label>' +
+    '<label>Udtale (arabizi)<input name="tr" value="' + esc(w.tr) + '" maxlength="60" autocomplete="off"></label>' +
+  '</div>';
+}
+function editHtml(w){
+  const has = !!S.clips[w.id];
+  return '<li class="row editing" data-row="' + w.id + '" data-edit="' + w.id + '">' +
+    fieldsHtml(w) +
+    '<div class="form-btns">' +
+      '<button class="btn" type="button" data-action="saveedit" data-id="' + w.id + '">Gem</button>' +
+      '<button class="btn ghost" type="button" data-action="canceledit">Annuller</button>' +
+      '<label class="btn ghost file">' + ICON.file + '<span>Vælg lydfil</span><input type="file" accept="audio/*" data-upload="' + w.id + '"></label>' +
+      (has ? '<button class="btn ghost danger" type="button" data-action="delclip" data-id="' + w.id + '">Slet optagelse</button>' : '') +
+      '<button class="btn ghost danger" type="button" data-action="delword" data-id="' + w.id + '">Fjern ordet</button>' +
+    '</div></li>';
+}
+function addHtml(themeId){
+  return '<li class="row editing" data-add="' + themeId + '">' +
+    fieldsHtml({emoji:'', da:'', ar:'', tr:''}) +
+    '<div class="form-btns">' +
+      '<button class="btn" type="button" data-action="saveadd" data-theme="' + themeId + '">Tilføj ordet</button>' +
+      '<button class="btn ghost" type="button" data-action="canceladd">Annuller</button>' +
+    '</div></li>';
+}
+function vParent(){
+  const all = allWords();
+  const n = all.filter(w => S.clips[w.id]).length;
+  return '<main class="wrap parent">' +
+    topbar('Forælder', '', '<span></span>') +
+    '<section class="intro">' +
+      '<p class="big-count"><b>' + n + '</b> af ' + all.length + ' ord har lyd</p>' +
+      '<p>Tryk Optag, sig ordet, og tryk Stop. Optagelsen afspilles bagefter, så du kan høre den. Højst ' + MAX_SEC + ' sekunder pr. ord.</p>' +
+      '<p>Stavningen er et forslag. Ret ordene, så de passer til jeres dialekt.</p>' +
+      (S.mic === 'blocked' ? '<div class="note"><p>' + MIC_TEXT[S.micReason || 'blocked'] + ' Indtil da kan du trykke Vælg lyd og bruge en lydoptagelse fra telefonen.</p>' +
+        (['denied','busy','nomic','blocked'].includes(S.micReason) ? '<button class="btn ghost" data-action="retrymic">Prøv mikrofonen igen</button>' : '') + '</div>' : '') +
+      statusLine() +
+    '</section>' +
+    '<section class="pgroup" style="--c:var(--teal)" data-kids aria-labelledby="g-kids">' +
+      '<h2 id="g-kids">Børnene</h2>' +
+      '<p class="hint">Navnene gemmes kun på denne enhed. Det lille barn ser billeder og hører lyd. Det store barn ser også arabisk skrift.</p>' +
+      '<div class="fields">' +
+        '<label>Navn (lille barn)<input name="small-name" value="' + esc(PLAYERS.small.name) + '" maxlength="24" autocomplete="off"></label>' +
+        '<label>Navn på arabisk (lille barn)<input name="small-ar" value="' + esc(PLAYERS.small.ar) + '" maxlength="24" dir="rtl" lang="ar" autocomplete="off"></label>' +
+        '<label>Navn (stort barn)<input name="big-name" value="' + esc(PLAYERS.big.name) + '" maxlength="24" autocomplete="off"></label>' +
+        '<label>Navn på arabisk (stort barn)<input name="big-ar" value="' + esc(PLAYERS.big.ar) + '" maxlength="24" dir="rtl" lang="ar" autocomplete="off"></label>' +
+      '</div>' +
+      '<div class="form-btns"><button class="btn" type="button" data-action="savekids">Gem navne</button></div>' +
+    '</section>' +
+    THEMES.map(t => {
+      const ws = themeWords(t.id);
+      const k = ws.filter(w => S.clips[w.id]).length;
+      return '<section class="pgroup" style="--c:' + t.c + '" aria-labelledby="g-' + t.id + '">' +
+        '<h2 id="g-' + t.id + '"><span aria-hidden="true">' + t.emoji + '</span>' + t.name + '<span class="g-count">' + k + ' af ' + ws.length + '</span></h2>' +
+        '<ul class="rows">' + ws.map(rowHtml).join('') + (S.adding === t.id ? addHtml(t.id) : '') + '</ul>' +
+        (S.adding === t.id ? '' : '<button class="btn ghost" data-action="add" data-theme="' + t.id + '">Tilføj ord</button>') +
+      '</section>';
+    }).join('') +
+    '<section class="pgroup" style="--c:var(--indigo)" data-backup aria-labelledby="g-backup">' +
+      '<h2 id="g-backup">Sikkerhedskopi</h2>' +
+      '<p class="hint">Gem en kopi af optagelser, ord og stjerner, fx før du rydder browseren eller skifter tablet. Indlæs kopien på den nye enhed.</p>' +
+      '<div class="form-btns">' +
+        '<button class="btn" type="button" data-action="export">Gem sikkerhedskopi</button>' +
+        '<label class="btn ghost file">Indlæs sikkerhedskopi<input type="file" accept="application/json,.json" data-import></label>' +
+      '</div>' +
+    '</section>' +
+  '</main>';
+}
+
+function render(){
+  const v = S.view;
+  app.innerHTML = v === 'themes' ? vThemes() : v === 'words' ? vWords() : v === 'game' ? vGame() : v === 'parent' ? vParent() : vHome();
+}
+function rerender(){
+  const y = window.scrollY;
+  render();
+  window.scrollTo(0, y);
+}
+function go(view){
+  if (S.view === 'parent' && view !== 'parent'){ if (rec) stopRecording(); S.editing = null; S.adding = null; }
+  S.view = view;
+  render();
+  window.scrollTo(0, 0);
+  const f = app.querySelector('[data-focus]');
+  if (f) f.focus({preventScroll:true});
+}
+
+/* ---------- Game ---------- */
+function startGame(){
+  const pool = themeWords(S.theme).filter(w => S.clips[w.id]).map(w => w.id);
+  if (pool.length < 3) return;
+  S.game = {pool, round:0, total:ROUNDS, target:null, prev:null, choices:[], wrong:[], solved:false, tried:false, earned:0, done:false};
+  S.view = 'game';
+  nextRound(true);
+}
+function nextRound(first){
+  const g = S.game;
+  if (!g) return;
+  if (g.round >= g.total){
+    g.done = true;
+    render();
+    const f = app.querySelector('[data-focus]'); if (f) f.focus({preventScroll:true});
+    fanfare();
+    return;
+  }
+  g.round += 1;
+  let cand = g.pool.filter(id => id !== g.prev);
+  if (!cand.length) cand = g.pool;
+  g.target = pick(cand); g.prev = g.target;
+  const n = PLAYERS[S.player].choices;
+  const target = byId(g.target);
+  const seen = new Set([target.emoji]);
+  const others = [];
+  const addFrom = list => { for (const w of shuffle(list)){ if (others.length >= n - 1) break; if (w.id === g.target || seen.has(w.emoji)) continue; seen.add(w.emoji); others.push(w.id); } };
+  addFrom(themeWords(S.theme));
+  if (others.length < n - 1) addFrom(allWords());
+  g.choices = shuffle([g.target].concat(others));
+  g.wrong = []; g.solved = false; g.tried = false;
+  render();
+  if (first){ window.scrollTo(0, 0); const f = app.querySelector('[data-focus]'); if (f) f.focus({preventScroll:true}); }
+  setTimeout(() => { if (S.view === 'game' && S.game === g && !g.solved) playWord(g.target); }, 380);
+}
+function burst(el){
+  if (reduced()) return;
+  for (let i = 0; i < 8; i++){
+    const s = document.createElement('span');
+    s.className = 'spark'; s.textContent = '★'; s.setAttribute('aria-hidden', 'true');
+    s.style.setProperty('--a', (i * 45) + 'deg');
+    el.appendChild(s);
+    setTimeout(() => s.remove(), 950);
+  }
+}
+function choose(id, el){
+  const g = S.game;
+  if (!g || g.solved || g.done) return;
+  if (id === g.target){
+    g.solved = true;
+    if (!g.tried){ g.earned += 1; S.stars[S.player] = starsOf(S.player) + 1; persistStars(); }
+    el.classList.add('right');
+    app.querySelectorAll('.choice').forEach(c => { if (c !== el) c.classList.add('fade'); });
+    burst(el);
+    const rv = app.querySelector('[data-reveal]'); if (rv) rv.innerHTML = revealHtml();
+    const sp = app.querySelector('[data-starpill]'); if (sp) sp.innerHTML = starPill(S.player);
+    const dots = app.querySelector('.dots'); if (dots) dots.outerHTML = dotsHtml();
+    chime();
+    setTimeout(() => { if (S.game === g) playWord(g.target); }, 450);
+    setTimeout(() => { if (S.view === 'game' && S.game === g) nextRound(false); }, 2100);
+  } else {
+    g.tried = true;
+    if (!g.wrong.includes(id)) g.wrong.push(id);
+    el.classList.remove('wrong'); void el.offsetWidth; el.classList.add('wrong');
+    boop();
+    setTimeout(() => { if (S.game === g && !g.solved) playWord(g.target); }, 520);
+  }
+}
+
+/* ---------- Toast & confirm ---------- */
+let toastTimer = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+let confirmKey = null, confirmTimer = null;
+function needConfirm(el, key, label){
+  if (confirmKey === key){ confirmKey = null; clearTimeout(confirmTimer); return false; }
+  confirmKey = key;
+  const orig = el.textContent;
+  el.textContent = label;
+  clearTimeout(confirmTimer);
+  confirmTimer = setTimeout(() => { if (confirmKey === key){ confirmKey = null; if (el.isConnected) el.textContent = orig; } }, 4000);
+  return true;
+}
+function readFields(box){
+  const get = n => { const i = box.querySelector('[name="' + n + '"]'); return i ? i.value.trim() : ''; };
+  return {emoji:get('emoji'), da:get('da'), ar:get('ar'), tr:get('tr')};
+}
+function focusFirstField(sel){
+  const box = app.querySelector(sel);
+  const i = box && box.querySelector('input[name="da"]');
+  if (i){ i.focus(); i.select(); }
+}
+
+/* ---------- Backup ---------- */
+function exportBackup(){
+  const data = {app:'kalimati', version:1, savedAt:new Date().toISOString(), clips:S.clips, words:S.words, stars:S.stars,
+    players:{small:{name:PLAYERS.small.name, ar:PLAYERS.small.ar}, big:{name:PLAYERS.big.name, ar:PLAYERS.big.ar}}};
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kalimati-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('Sikkerhedskopien gemmes i dine overførsler.');
+}
+async function importBackup(file){
+  if (!file) return;
+  let d;
+  try { d = JSON.parse(await file.text()); } catch (e) { toast('Filen kunne ikke læses.'); return; }
+  if (!d || d.app !== 'kalimati'){ toast('Filen er ikke en sikkerhedskopi fra Kalimati.'); return; }
+  const flat = {words:d.words || {}, progress:{stars:d.stars || {}}, players:d.players || {}};
+  for (const [id, c] of Object.entries(d.clips || {})) if (c && typeof c.audio === 'string') flat['clip-' + id] = {audio:c.audio};
+  applyLoaded(flat);
+  try {
+    for (const [id, c] of Object.entries(S.clips)) await store.write('clip-' + id, {audio:c.audio, at:Date.now()});
+    await store.write('words', {edits:S.words.edits, hidden:S.words.hidden, custom:S.words.custom});
+    await store.write('progress', {stars:{...S.stars}});
+    await store.write('players', {small:{name:PLAYERS.small.name, ar:PLAYERS.small.ar}, big:{name:PLAYERS.big.name, ar:PLAYERS.big.ar}});
+    toast('Sikkerhedskopien er indlæst.');
+  } catch (e) { toast('Kopien er indlæst, men kunne ikke gemmes helt. Prøv igen.'); }
+  rerender();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el || el.disabled) return;
+  const a = el.dataset.action, id = el.dataset.id;
+  switch (a){
+    case 'player': S.player = id; go('themes'); break;
+    case 'theme': S.theme = id; go('words'); break;
+    case 'back':
+      if (S.view === 'themes') go('home');
+      else if (S.view === 'words') go('themes');
+      else if (S.view === 'game'){ S.game = null; go('words'); }
+      else go('home');
+      break;
+    case 'say':
+      el.classList.remove('pop', 'nudge'); void el.offsetWidth;
+      if (playWord(id)) el.classList.add('pop'); else el.classList.add('nudge');
+      break;
+    case 'startgame': startGame(); break;
+    case 'listen': if (S.game) playWord(S.game.target); break;
+    case 'choose': choose(id, el); break;
+    case 'rec': toggleRecord(id); break;
+    case 'play': playWord(id); break;
+    case 'edit':
+      if (rec) stopRecording();
+      S.editing = id; S.adding = null; rerender(); focusFirstField('[data-edit="' + id + '"]');
+      break;
+    case 'canceledit': S.editing = null; rerender(); break;
+    case 'saveedit': {
+      const box = el.closest('[data-edit]');
+      const f = readFields(box);
+      if (!f.da || !f.emoji){ toast('Udfyld billede og dansk ord.'); return; }
+      if (id.startsWith('c-')){ const w = S.words.custom.find(x => x.id === id); if (w) Object.assign(w, f); }
+      else S.words.edits[id] = f;
+      S.editing = null; persistWords(); rerender(); toast('Ordet er gemt.');
+      break;
+    }
+    case 'delclip':
+      if (needConfirm(el, 'clip:' + id, 'Tryk igen for at slette')) return;
+      delete S.clips[id];
+      store.write('clip-' + id, null).catch(() => toast('Optagelsen kunne ikke slettes. Prøv igen.'));
+      rerender(); toast('Optagelsen er slettet.');
+      break;
+    case 'delword':
+      if (needConfirm(el, 'word:' + id, 'Tryk igen for at fjerne')) return;
+      if (id.startsWith('c-')) S.words.custom = S.words.custom.filter(w => w.id !== id);
+      else { if (!S.words.hidden.includes(id)) S.words.hidden.push(id); delete S.words.edits[id]; }
+      if (S.clips[id]){ delete S.clips[id]; store.write('clip-' + id, null).catch(() => {}); }
+      S.editing = null; persistWords(); rerender(); toast('Ordet er fjernet.');
+      break;
+    case 'add':
+      if (rec) stopRecording();
+      S.adding = el.dataset.theme; S.editing = null; rerender(); focusFirstField('[data-add="' + S.adding + '"]');
+      break;
+    case 'canceladd': S.adding = null; rerender(); break;
+    case 'retrymic': S.mic = 'unknown'; S.micReason = null; rerender(); toast('Tryk Optag ved et ord for at prøve igen.'); break;
+    case 'export': exportBackup(); break;
+    case 'savekids': {
+      const box = el.closest('[data-kids]');
+      const val = n => { const i = box.querySelector('[name="' + n + '"]'); return i ? i.value.trim() : ''; };
+      for (const pid of Object.keys(PLAYERS)){ PLAYERS[pid].name = val(pid + '-name') || PLAYER_DEFAULTS[pid]; PLAYERS[pid].ar = val(pid + '-ar'); }
+      store.write('players', {small:{name:PLAYERS.small.name, ar:PLAYERS.small.ar}, big:{name:PLAYERS.big.name, ar:PLAYERS.big.ar}})
+        .then(() => toast('Navnene er gemt.')).catch(() => toast('Navnene kunne ikke gemmes. Prøv igen.'));
+      rerender();
+      break;
+    }
+    case 'saveadd': {
+      const box = el.closest('[data-add]');
+      const f = readFields(box);
+      if (!f.da || !f.emoji){ toast('Udfyld billede og dansk ord.'); return; }
+      const nid = 'c-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      S.words.custom.push({id:nid, theme:el.dataset.theme, ...f});
+      S.adding = null; persistWords(); rerender(); toast('Ordet er tilføjet. Indtal det nu.');
+      break;
+    }
+  }
+});
+
+document.addEventListener('change', e => {
+  const imp = e.target.closest && e.target.closest('input[data-import]');
+  if (imp){ const f = imp.files && imp.files[0]; imp.value = ''; importBackup(f); return; }
+  const inp = e.target.closest && e.target.closest('input[data-upload]');
+  if (!inp) return;
+  const file = inp.files && inp.files[0];
+  const id = inp.dataset.upload;
+  inp.value = '';
+  handleUpload(id, file);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches && e.target.matches('.fields input')){
+    e.preventDefault();
+    const row = e.target.closest('.row, [data-kids]');
+    const b = row && row.querySelector('[data-action="saveedit"],[data-action="saveadd"],[data-action="savekids"]');
+    if (b) b.click();
+  }
+  if ((e.key === ' ' || e.key === 'Enter') && !e.repeat && e.target.closest && e.target.closest('[data-hold]')){
+    e.preventDefault(); holdStart(e.target.closest('[data-hold]'));
+  }
+});
+document.addEventListener('keyup', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && e.target.closest && e.target.closest('[data-hold]')) holdEnd();
+});
+
+/* Parent gate: press and hold */
+let holdTimer = null, holdEl = null;
+function holdStart(el){
+  if (holdTimer) return;
+  holdEl = el; el.classList.add('holding');
+  holdTimer = setTimeout(() => { holdTimer = null; if (holdEl) holdEl.classList.remove('holding'); holdEl = null; go('parent'); }, 1200);
+}
+function holdEnd(){
+  clearTimeout(holdTimer); holdTimer = null;
+  if (holdEl) holdEl.classList.remove('holding');
+  holdEl = null;
+}
+document.addEventListener('pointerdown', e => { const h = e.target.closest && e.target.closest('[data-hold]'); if (h){ e.preventDefault(); holdStart(h); } });
+['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, holdEnd));
+document.addEventListener('pointerout', e => { if (holdEl && e.target.closest && e.target.closest('[data-hold]') === holdEl && !holdEl.contains(e.relatedTarget)) holdEnd(); });
+document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('[data-hold]')) e.preventDefault(); });
+
+/* ---------- Start ---------- */
+if ('serviceWorker' in navigator && !window.claude && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+render();
+store.init().then(data => {
+  applyLoaded(data);
+  if (S.editing || S.adding || S.view === 'game'){
+    const st = app.querySelector('[data-status]'); if (st) st.outerHTML = statusLine();
+  } else rerender();
+});
+})();
+</script>
+</body>
+</html>
